@@ -34,6 +34,11 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
+    public long count() {
+        return postRepository.count();
+    }
+
+    @Transactional(readOnly = true)
     public List<PostResponse> findAll() {
         return postRepository.findAll().stream()
                 .map(PostResponse::from)

@@ -6,6 +6,7 @@ import com._61119report.member.member.dto.MemberDto;
 import com._61119report.member.member.dto.MemberJoinRequest;
 import com._61119report.member.member.entity.Member;
 import com._61119report.member.member.repository.MemberRepository;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,11 @@ public class MemberService {
     @Transactional(readOnly = true)
     public boolean existsByUsername(String username) {
         return memberRepository.existsByUsername(username);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Member> findByUsername(String username) {
+        return memberRepository.findByUsername(username);
     }
 
     /**
