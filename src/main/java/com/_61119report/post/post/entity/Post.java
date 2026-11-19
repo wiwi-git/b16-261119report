@@ -57,13 +57,24 @@ public class Post extends BaseEntity {
         return comment;
     }
 
+    public PostComment modifyComment(Member actor, Long commentId, String content) {
+        PostComment comment = findComment(commentId);
+        comment.checkActorCanModify(actor);
+        comment.modify(content); // 더티체킹으로 커밋 시 UPDATE
+        return comment;
+    }
+
     public void removeComment(Member actor, Long commentId) {
-        PostComment comment = comments.stream()
+        PostComment comment = findComment(commentId);
+        comment.checkActorCanDelete(actor);
+        comments.remove(comment);
+    }
+
+    private PostComment findComment(Long commentId) {
+        return comments.stream()
                 .filter(c -> c.getId().equals(commentId))
                 .findFirst()
                 .orElseThrow(() -> new PostCommentNotFoundException(commentId));
-        comment.checkActorCanDelete(actor);
-        comments.remove(comment);
     }
 
     public void checkActorCanModify(Member actor) {

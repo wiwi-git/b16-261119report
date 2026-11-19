@@ -36,10 +36,24 @@ public class PostComment extends BaseEntity {
         this.content = content;
     }
 
-    public void checkActorCanDelete(Member actor) {
-        if (!author.getId().equals(actor.getId())) {
+    public void modify(String content) {
+        this.content = content;
+    }
+
+    public void checkActorCanModify(Member actor) {
+        if (!isAuthor(actor)) {
             throw new AccessDeniedException();
         }
+    }
+
+    public void checkActorCanDelete(Member actor) {
+        if (!isAuthor(actor)) {
+            throw new AccessDeniedException();
+        }
+    }
+
+    private boolean isAuthor(Member actor) {
+        return author.getId().equals(actor.getId());
     }
 
     public Post getPost() {

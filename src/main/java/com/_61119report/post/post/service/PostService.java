@@ -10,6 +10,7 @@ import com._61119report.post.post.entity.Post;
 import com._61119report.post.post.repository.PostRepository;
 import com._61119report.post.postComment.dto.PostCommentCreateRequest;
 import com._61119report.post.postComment.dto.PostCommentResponse;
+import com._61119report.post.postComment.dto.PostCommentUpdateRequest;
 import com._61119report.post.postComment.entity.PostComment;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,15 @@ public class PostService {
         Post post = getPost(postId);
         PostComment comment = post.addComment(author, request.content());
         postRepository.flush(); // 응답에 담을 댓글 id 를 받기 위해 즉시 반영
+        return PostCommentResponse.from(comment);
+    }
+
+    @Transactional
+    public PostCommentResponse modifyComment(Long postId, Long commentId, Long actorId, PostCommentUpdateRequest request) {
+        Member actor = memberService.getActor(actorId);
+        Post post = getPost(postId);
+        PostComment comment = post.modifyComment(actor, commentId, request.content());
+        postRepository.flush(); // 응답의 updatedAt 반영을 위해 즉시 반영
         return PostCommentResponse.from(comment);
     }
 

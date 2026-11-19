@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -98,6 +99,40 @@ class PostCommentControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].content").value("c1"))
                 .andExpect(jsonPath("$[1].content").value("c2"));
+    }
+
+    @Test
+    void modifyComment() throws Exception {
+        PostCommentResponse comment = addComment("c1");
+
+        mockMvc.perform(put("/api/v1/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+                        .param("actorId", commentAuthor.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"content":"수정된 댓글"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 댓글이 수정되었습니다.".formatted(comment.id())))
+                .andExpect(jsonPath("$.data.content").value("수정된 댓글"));
+
+        mockMvc.perform(get("/api/v1/posts/{postId}/comments", post.getId()))
+                .andExpect(jsonPath("$[0].content").value("수정된 댓글"));
+    }
+
+    @Test
+    void modifyCommentByNonAuthor() throws Exception {
+        PostCommentResponse comment = addComment("c1");
+
+        mockMvc.perform(put("/api/v1/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+                        .param("actorId", postAuthor.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"content":"수정된 댓글"}
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.msg").value("권한이 없습니다."));
     }
 
     @Test
