@@ -30,7 +30,7 @@ class MemberControllerTest {
     void join() throws Exception {
         memberRepository.findByUsername("newuser").ifPresent(memberRepository::delete);
 
-        mockMvc.perform(post("/api/members/join")
+        mockMvc.perform(post("/api/v1/members/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"newuser","password":"password1","name":"홍길동"}
@@ -44,7 +44,7 @@ class MemberControllerTest {
     @Test
     void joinDuplicateUsername() throws Exception {
         // user1 은 샘플 데이터(BaseInitData)로 이미 존재
-        mockMvc.perform(post("/api/members/join")
+        mockMvc.perform(post("/api/v1/members/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"user1","password":"password2","name":"임꺽정"}
@@ -59,7 +59,7 @@ class MemberControllerTest {
     void me() throws Exception {
         Member member = memberRepository.findByUsername("user1").orElseThrow();
 
-        mockMvc.perform(get("/api/members/me").param("actorId", member.getId().toString()))
+        mockMvc.perform(get("/api/v1/members/me").param("actorId", member.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(member.getId()))
                 .andExpect(jsonPath("$.createDate").exists())
@@ -71,14 +71,14 @@ class MemberControllerTest {
 
     @Test
     void meWithoutActorId() throws Exception {
-        mockMvc.perform(get("/api/members/me"))
+        mockMvc.perform(get("/api/v1/members/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-1"));
     }
 
     @Test
     void joinInvalidRequest() throws Exception {
-        mockMvc.perform(post("/api/members/join")
+        mockMvc.perform(post("/api/v1/members/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"abc","password":"short","name":"홍"}

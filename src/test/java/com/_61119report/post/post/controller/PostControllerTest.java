@@ -45,7 +45,7 @@ class PostControllerTest {
 
     @Test
     void create() throws Exception {
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .param("actorId", author.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -64,7 +64,7 @@ class PostControllerTest {
 
     @Test
     void createWithoutActorId() throws Exception {
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"제목","content":"내용"}
@@ -78,7 +78,7 @@ class PostControllerTest {
         postRepository.save(new Post(author, "t1", "c1"));
         postRepository.save(new Post(author, "t2", "c2"));
 
-        mockMvc.perform(get("/api/posts"))
+        mockMvc.perform(get("/api/v1/posts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
@@ -87,14 +87,14 @@ class PostControllerTest {
     void findById() throws Exception {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
-        mockMvc.perform(get("/api/posts/{id}", saved.getId()))
+        mockMvc.perform(get("/api/v1/posts/{id}", saved.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("t1"));
     }
 
     @Test
     void findByIdNotFound() throws Exception {
-        mockMvc.perform(get("/api/posts/{id}", 9999))
+        mockMvc.perform(get("/api/v1/posts/{id}", 9999))
                 .andExpect(status().isNotFound());
     }
 
@@ -102,7 +102,7 @@ class PostControllerTest {
     void update() throws Exception {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
-        mockMvc.perform(put("/api/posts/{id}", saved.getId())
+        mockMvc.perform(put("/api/v1/posts/{id}", saved.getId())
                         .param("actorId", author.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -120,7 +120,7 @@ class PostControllerTest {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
         Member other = memberRepository.findByUsername("user2").orElseThrow();
 
-        mockMvc.perform(put("/api/posts/{id}", saved.getId())
+        mockMvc.perform(put("/api/v1/posts/{id}", saved.getId())
                         .param("actorId", other.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -135,13 +135,13 @@ class PostControllerTest {
     void deletePost() throws Exception {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
-        mockMvc.perform(delete("/api/posts/{id}", saved.getId())
+        mockMvc.perform(delete("/api/v1/posts/{id}", saved.getId())
                         .param("actorId", author.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 글이 삭제되었습니다.".formatted(saved.getId())))
                 .andExpect(jsonPath("$.data").doesNotExist());
-        mockMvc.perform(get("/api/posts/{id}", saved.getId()))
+        mockMvc.perform(get("/api/v1/posts/{id}", saved.getId()))
                 .andExpect(status().isNotFound());
     }
 }

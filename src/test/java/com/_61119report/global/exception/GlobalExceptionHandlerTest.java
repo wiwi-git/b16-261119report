@@ -52,7 +52,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void validationErrorMessageIsFieldCodeMessageSortedByField() throws Exception {
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"","content":""}
@@ -67,7 +67,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void malformedJson() throws Exception {
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{not-json"))
                 .andExpect(status().isBadRequest())
@@ -76,7 +76,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void postNotFound() throws Exception {
-        mockMvc.perform(get("/api/posts/{id}", 9999))
+        mockMvc.perform(get("/api/v1/posts/{id}", 9999))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.resultCode").value("404-1"))
                 .andExpect(jsonPath("$.msg").value("9999번 글은 존재하지 않습니다."));

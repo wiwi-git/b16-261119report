@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Tag(name = "PostController", description = "글 API")
-@RequestMapping("/api/posts")
+@RequestMapping("/api/v1/posts")
 public class PostController {
 
     private final PostService postService;

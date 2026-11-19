@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Tag(name = "PostCommentController", description = "댓글 API")
-@RequestMapping("/api/posts/{postId}/comments")
+@RequestMapping("/api/v1/posts/{postId}/comments")
 public class PostCommentController {
 
     private final PostService postService;

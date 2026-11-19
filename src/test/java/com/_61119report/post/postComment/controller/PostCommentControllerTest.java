@@ -59,7 +59,7 @@ class PostCommentControllerTest {
 
     @Test
     void create() throws Exception {
-        mockMvc.perform(post("/api/posts/{postId}/comments", post.getId())
+        mockMvc.perform(post("/api/v1/posts/{postId}/comments", post.getId())
                         .param("actorId", commentAuthor.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -79,7 +79,7 @@ class PostCommentControllerTest {
 
     @Test
     void createOnMissingPost() throws Exception {
-        mockMvc.perform(post("/api/posts/{postId}/comments", 9999)
+        mockMvc.perform(post("/api/v1/posts/{postId}/comments", 9999)
                         .param("actorId", commentAuthor.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -93,7 +93,7 @@ class PostCommentControllerTest {
         addComment("c1");
         addComment("c2");
 
-        mockMvc.perform(get("/api/posts/{postId}/comments", post.getId()))
+        mockMvc.perform(get("/api/v1/posts/{postId}/comments", post.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].content").value("c1"))
@@ -104,7 +104,7 @@ class PostCommentControllerTest {
     void deleteComment() throws Exception {
         PostCommentResponse comment = addComment("c1");
 
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+        mockMvc.perform(delete("/api/v1/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
                         .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
@@ -119,7 +119,7 @@ class PostCommentControllerTest {
         PostCommentResponse comment = addComment("c1");
 
         // 글 작성자(user1)라도 댓글 작성자(user2)가 아니면 삭제 불가
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+        mockMvc.perform(delete("/api/v1/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
                         .param("actorId", postAuthor.getId().toString()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
@@ -130,7 +130,7 @@ class PostCommentControllerTest {
 
     @Test
     void deleteMissingComment() throws Exception {
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), 9999)
+        mockMvc.perform(delete("/api/v1/posts/{postId}/comments/{commentId}", post.getId(), 9999)
                         .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isNotFound());
     }
@@ -140,7 +140,7 @@ class PostCommentControllerTest {
         PostCommentResponse comment = addComment("c1");
         Post other = postRepository.save(new Post(postAuthor, "다른 글", "내용"));
 
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", other.getId(), comment.id())
+        mockMvc.perform(delete("/api/v1/posts/{postId}/comments/{commentId}", other.getId(), comment.id())
                         .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isNotFound());
 
@@ -152,7 +152,7 @@ class PostCommentControllerTest {
         addComment("c1");
         addComment("c2");
 
-        mockMvc.perform(delete("/api/posts/{id}", post.getId())
+        mockMvc.perform(delete("/api/v1/posts/{id}", post.getId())
                         .param("actorId", postAuthor.getId().toString()))
                 .andExpect(status().isOk());
 
