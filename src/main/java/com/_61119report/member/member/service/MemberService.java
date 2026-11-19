@@ -20,11 +20,22 @@ public class MemberService {
 
     @Transactional
     public Member join(MemberJoinRequest reqBody) {
-        if (memberRepository.existsByUsername(reqBody.username())) {
-            throw new MemberDuplicateUsernameException(reqBody.username());
+        return join(reqBody.username(), reqBody.password(), reqBody.name());
+    }
+
+    // 요청 DTO 검증(@Valid)을 거치지 않는 내부용 (샘플 데이터 등)
+    @Transactional
+    public Member join(String username, String password, String name) {
+        if (memberRepository.existsByUsername(username)) {
+            throw new MemberDuplicateUsernameException(username);
         }
 
-        return memberRepository.save(new Member(reqBody.username(), reqBody.password(), reqBody.name()));
+        return memberRepository.save(new Member(username, password, name));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return memberRepository.existsByUsername(username);
     }
 
     /**
