@@ -10,7 +10,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -28,8 +27,8 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    // @Lob 만 쓰면 MySQL 에서 tinytext(255바이트)로 생성되므로 TEXT(64KB) 로 명시
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     // 댓글의 생명주기는 Post 가 관리한다: 컬렉션에 추가/제거하면 더티체킹으로 INSERT/DELETE 된다.
