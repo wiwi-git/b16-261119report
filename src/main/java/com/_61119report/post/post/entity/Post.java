@@ -1,21 +1,20 @@
 package com._61119report.post.post.entity;
 
+import com._61119report.global.entity.BaseEntity;
+import com._61119report.global.exception.PostCommentNotFoundException;
+import com._61119report.post.postComment.entity.PostComment;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Entity
-public class Post {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Post extends BaseEntity {
 
     @Column(nullable = false)
     private String title;
@@ -27,13 +26,10 @@ public class Post {
     @Column(nullable = false, length = 50)
     private String author;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    // 댓글의 생명주기는 Post 가 관리한다: 컬렉션에 추가/제거하면 더티체킹으로 INSERT/DELETE 된다.
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
+    private List<PostComment> comments = new ArrayList<>();
 
     protected Post() {
     }
@@ -49,8 +45,22 @@ public class Post {
         this.content = content;
     }
 
-    public Long getId() {
-        return id;
+    public PostComment addComment(String content, String author) {
+        PostComment comment = new PostComment(this, content, author);
+        comments.add(comment);
+        return comment;
+    }
+
+    public void removeComment(Long commentId) {
+        PostComment comment = comments.stream()
+                .filter(c -> c.getId().equals(commentId))
+                .findFirst()
+                .orElseThrow(() -> new PostCommentNotFoundException(commentId));
+        comments.remove(comment);
+    }
+
+    public List<PostComment> getComments() {
+        return Collections.unmodifiableList(comments);
     }
 
     public String getTitle() {
@@ -63,13 +73,5 @@ public class Post {
 
     public String getAuthor() {
         return author;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }

@@ -6,6 +6,9 @@ import com._61119report.post.post.dto.PostResponse;
 import com._61119report.post.post.dto.PostUpdateRequest;
 import com._61119report.post.post.entity.Post;
 import com._61119report.post.post.repository.PostRepository;
+import com._61119report.post.postComment.dto.PostCommentCreateRequest;
+import com._61119report.post.postComment.dto.PostCommentResponse;
+import com._61119report.post.postComment.entity.PostComment;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +51,29 @@ public class PostService {
     @Transactional
     public void delete(Long id) {
         postRepository.delete(getPost(id));
+    }
+
+    // ===== 댓글: Post 애그리거트를 통해 처리 (save/delete 호출 없이 더티체킹) =====
+
+    @Transactional(readOnly = true)
+    public List<PostCommentResponse> findComments(Long postId) {
+        return getPost(postId).getComments().stream()
+                .map(PostCommentResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public PostCommentResponse addComment(Long postId, PostCommentCreateRequest request) {
+        Post post = getPost(postId);
+        PostComment comment = post.addComment(request.content(), request.author());
+        postRepository.flush(); // 응답에 담을 댓글 id 를 받기 위해 즉시 반영
+        return PostCommentResponse.from(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long postId, Long commentId) {
+        Post post = getPost(postId);
+        post.removeComment(commentId); // orphanRemoval 로 커밋 시 DELETE
     }
 
     private Post getPost(Long id) {
