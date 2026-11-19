@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -57,7 +56,6 @@ class PostCommentControllerTest {
                                 {"content":"댓글","author":"kim"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.statusCode").doesNotExist())
                 .andExpect(jsonPath("$.msg").value(endsWith("번 댓글이 작성되었습니다.")))

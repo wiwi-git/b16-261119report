@@ -5,9 +5,7 @@ import com._61119report.post.post.dto.PostCreateRequest;
 import com._61119report.post.post.dto.PostResponse;
 import com._61119report.post.post.dto.PostUpdateRequest;
 import com._61119report.post.post.service.PostService;
-import java.net.URI;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * RsData 반환 API 의 HTTP 상태코드는 ResponseAspect 가 rsData.statusCode() 로 지정한다.
+ */
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -28,14 +29,9 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<RsData<PostResponse>> create(@RequestBody PostCreateRequest request) {
+    public RsData<PostResponse> create(@RequestBody PostCreateRequest request) {
         PostResponse response = postService.create(request);
-        RsData<PostResponse> rsData = new RsData<>(
-                "201-1", "%d번 글이 작성되었습니다.".formatted(response.id()), response);
-
-        return ResponseEntity.status(rsData.statusCode())
-                .location(URI.create("/api/posts/" + response.id()))
-                .body(rsData);
+        return new RsData<>("201-1", "%d번 글이 작성되었습니다.".formatted(response.id()), response);
     }
 
     @GetMapping
@@ -49,22 +45,14 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RsData<PostResponse>> update(
-            @PathVariable Long id,
-            @RequestBody PostUpdateRequest request
-    ) {
+    public RsData<PostResponse> update(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
         PostResponse response = postService.update(id, request);
-        RsData<PostResponse> rsData = new RsData<>(
-                "200-1", "%d번 글이 수정되었습니다.".formatted(id), response);
-
-        return ResponseEntity.status(rsData.statusCode()).body(rsData);
+        return new RsData<>("200-1", "%d번 글이 수정되었습니다.".formatted(id), response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<RsData<Void>> delete(@PathVariable Long id) {
+    public RsData<Void> delete(@PathVariable Long id) {
         postService.delete(id);
-        RsData<Void> rsData = new RsData<>("200-1", "%d번 글이 삭제되었습니다.".formatted(id));
-
-        return ResponseEntity.status(rsData.statusCode()).body(rsData);
+        return new RsData<>("200-1", "%d번 글이 삭제되었습니다.".formatted(id));
     }
 }

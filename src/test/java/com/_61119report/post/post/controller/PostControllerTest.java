@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,7 +43,6 @@ class PostControllerTest {
                                 {"title":"제목","content":"내용","author":"yeon"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.statusCode").doesNotExist())
                 .andExpect(jsonPath("$.msg").value(endsWith("번 글이 작성되었습니다.")))
