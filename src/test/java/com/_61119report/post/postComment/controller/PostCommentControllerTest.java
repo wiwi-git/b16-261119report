@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com._61119report.member.member.entity.Member;
+import com._61119report.member.member.repository.MemberRepository;
 import com._61119report.post.post.entity.Post;
 import com._61119report.post.post.repository.PostRepository;
 import com._61119report.post.post.service.PostService;
@@ -40,20 +42,28 @@ class PostCommentControllerTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    MemberRepository memberRepository;
+
+    Member postAuthor;
+    Member commentAuthor;
     Post post;
 
     @BeforeEach
     void setUp() {
         postRepository.deleteAll();
-        post = postRepository.save(new Post("제목", "내용", "yeon"));
+        postAuthor = memberRepository.findByUsername("user1").orElseThrow();    // 샘플 회원
+        commentAuthor = memberRepository.findByUsername("user2").orElseThrow(); // 샘플 회원
+        post = postRepository.save(new Post(postAuthor, "제목", "내용"));
     }
 
     @Test
     void create() throws Exception {
         mockMvc.perform(post("/api/posts/{postId}/comments", post.getId())
+                        .param("actorId", commentAuthor.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"content":"댓글","author":"kim"}
+                                {"content":"댓글"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
@@ -61,7 +71,8 @@ class PostCommentControllerTest {
                 .andExpect(jsonPath("$.msg").value(endsWith("번 댓글이 작성되었습니다.")))
                 .andExpect(jsonPath("$.data.id").isNumber())
                 .andExpect(jsonPath("$.data.content").value("댓글"))
-                .andExpect(jsonPath("$.data.author").value("kim"));
+                .andExpect(jsonPath("$.data.authorId").value(commentAuthor.getId()))
+                .andExpect(jsonPath("$.data.authorName").value("유저2"));
 
         assertThat(commentCount()).isEqualTo(1);
     }
@@ -69,9 +80,10 @@ class PostCommentControllerTest {
     @Test
     void createOnMissingPost() throws Exception {
         mockMvc.perform(post("/api/posts/{postId}/comments", 9999)
+                        .param("actorId", commentAuthor.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"content":"댓글","author":"kim"}
+                                {"content":"댓글"}
                                 """))
                 .andExpect(status().isNotFound());
     }
@@ -110,7 +122,7 @@ class PostCommentControllerTest {
     @Test
     void deleteCommentOfOtherPost() throws Exception {
         PostCommentResponse comment = addComment("c1");
-        Post other = postRepository.save(new Post("다른 글", "내용", "lee"));
+        Post other = postRepository.save(new Post(postAuthor, "다른 글", "내용"));
 
         mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", other.getId(), comment.id()))
                 .andExpect(status().isNotFound());
@@ -130,7 +142,7 @@ class PostCommentControllerTest {
     }
 
     private PostCommentResponse addComment(String content) {
-        return postService.addComment(post.getId(), new PostCommentCreateRequest(content, "kim"));
+        return postService.addComment(post.getId(), commentAuthor.getId(), new PostCommentCreateRequest(content));
     }
 
     private int commentCount() {

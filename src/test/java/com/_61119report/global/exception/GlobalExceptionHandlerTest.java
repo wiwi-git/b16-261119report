@@ -55,14 +55,14 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"","content":"","author":""}
+                                {"title":"","content":""}
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.resultCode").value("400-1"))
                 .andExpect(jsonPath("$.statusCode").doesNotExist())
                 // defaultMessage 는 로케일마다 달라서 "필드-코드-" 와 정렬/줄바꿈만 검증
                 .andExpect(jsonPath("$.msg").value(matchesPattern(
-                        "author-NotBlank-.+\ncontent-NotBlank-.+\ntitle-NotBlank-.+")));
+                        "content-NotBlank-.+\ntitle-NotBlank-.+")));
     }
 
     @Test

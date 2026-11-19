@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -30,8 +31,11 @@ public class PostController {
     }
 
     @PostMapping
-    public RsData<PostResponse> create(@Valid @RequestBody PostCreateRequest request) {
-        PostResponse response = postService.create(request);
+    public RsData<PostResponse> create(
+            @RequestParam(required = false) Long actorId,
+            @Valid @RequestBody PostCreateRequest request
+    ) {
+        PostResponse response = postService.create(actorId, request);
         return new RsData<>("201-1", "%d번 글이 작성되었습니다.".formatted(response.id()), response);
     }
 

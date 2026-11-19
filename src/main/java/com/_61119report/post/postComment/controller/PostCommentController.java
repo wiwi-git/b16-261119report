@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -36,9 +37,10 @@ public class PostCommentController {
     @PostMapping
     public RsData<PostCommentResponse> create(
             @PathVariable Long postId,
+            @RequestParam(required = false) Long actorId,
             @Valid @RequestBody PostCommentCreateRequest request
     ) {
-        PostCommentResponse response = postService.addComment(postId, request);
+        PostCommentResponse response = postService.addComment(postId, actorId, request);
         return new RsData<>("201-1", "%d번 댓글이 작성되었습니다.".formatted(response.id()), response);
     }
 

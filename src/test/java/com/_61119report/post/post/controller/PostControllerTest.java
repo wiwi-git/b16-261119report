@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com._61119report.member.member.entity.Member;
+import com._61119report.member.member.repository.MemberRepository;
 import com._61119report.post.post.entity.Post;
 import com._61119report.post.post.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,17 +32,24 @@ class PostControllerTest {
     @Autowired
     PostRepository postRepository;
 
+    @Autowired
+    MemberRepository memberRepository;
+
+    Member author;
+
     @BeforeEach
     void setUp() {
         postRepository.deleteAll();
+        author = memberRepository.findByUsername("user1").orElseThrow(); // 샘플 회원
     }
 
     @Test
     void create() throws Exception {
         mockMvc.perform(post("/api/posts")
+                        .param("actorId", author.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"title":"제목","content":"내용","author":"yeon"}
+                                {"title":"제목","content":"내용"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
@@ -48,14 +57,26 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.msg").value(endsWith("번 글이 작성되었습니다.")))
                 .andExpect(jsonPath("$.data.id").isNumber())
                 .andExpect(jsonPath("$.data.title").value("제목"))
-                .andExpect(jsonPath("$.data.author").value("yeon"))
+                .andExpect(jsonPath("$.data.authorId").value(author.getId()))
+                .andExpect(jsonPath("$.data.authorName").value("유저1"))
                 .andExpect(jsonPath("$.data.createdAt").exists());
     }
 
     @Test
+    void createWithoutActorId() throws Exception {
+        mockMvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"제목","content":"내용"}
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"));
+    }
+
+    @Test
     void findAll() throws Exception {
-        postRepository.save(new Post("t1", "c1", "a"));
-        postRepository.save(new Post("t2", "c2", "b"));
+        postRepository.save(new Post(author, "t1", "c1"));
+        postRepository.save(new Post(author, "t2", "c2"));
 
         mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
@@ -64,7 +85,7 @@ class PostControllerTest {
 
     @Test
     void findById() throws Exception {
-        Post saved = postRepository.save(new Post("t1", "c1", "a"));
+        Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
         mockMvc.perform(get("/api/posts/{id}", saved.getId()))
                 .andExpect(status().isOk())
@@ -79,7 +100,7 @@ class PostControllerTest {
 
     @Test
     void update() throws Exception {
-        Post saved = postRepository.save(new Post("t1", "c1", "a"));
+        Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
         mockMvc.perform(put("/api/posts/{id}", saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +116,7 @@ class PostControllerTest {
 
     @Test
     void deletePost() throws Exception {
-        Post saved = postRepository.save(new Post("t1", "c1", "a"));
+        Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
         mockMvc.perform(delete("/api/posts/{id}", saved.getId()))
                 .andExpect(status().isOk())

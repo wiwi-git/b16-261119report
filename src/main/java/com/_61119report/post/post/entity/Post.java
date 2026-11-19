@@ -2,11 +2,15 @@ package com._61119report.post.post.entity;
 
 import com._61119report.global.entity.BaseEntity;
 import com._61119report.global.exception.PostCommentNotFoundException;
+import com._61119report.member.member.entity.Member;
 import com._61119report.post.postComment.entity.PostComment;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import java.util.ArrayList;
@@ -16,15 +20,16 @@ import java.util.List;
 @Entity
 public class Post extends BaseEntity {
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "author_id", nullable = false)
+    private Member author;
+
     @Column(nullable = false)
     private String title;
 
     @Lob
     @Column(nullable = false)
     private String content;
-
-    @Column(nullable = false, length = 50)
-    private String author;
 
     // 댓글의 생명주기는 Post 가 관리한다: 컬렉션에 추가/제거하면 더티체킹으로 INSERT/DELETE 된다.
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -34,10 +39,10 @@ public class Post extends BaseEntity {
     protected Post() {
     }
 
-    public Post(String title, String content, String author) {
+    public Post(Member author, String title, String content) {
+        this.author = author;
         this.title = title;
         this.content = content;
-        this.author = author;
     }
 
     public void update(String title, String content) {
@@ -45,8 +50,8 @@ public class Post extends BaseEntity {
         this.content = content;
     }
 
-    public PostComment addComment(String content, String author) {
-        PostComment comment = new PostComment(this, content, author);
+    public PostComment addComment(Member author, String content) {
+        PostComment comment = new PostComment(this, author, content);
         comments.add(comment);
         return comment;
     }
@@ -71,7 +76,7 @@ public class Post extends BaseEntity {
         return content;
     }
 
-    public String getAuthor() {
+    public Member getAuthor() {
         return author;
     }
 }

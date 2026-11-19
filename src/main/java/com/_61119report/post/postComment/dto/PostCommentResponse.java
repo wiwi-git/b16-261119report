@@ -5,19 +5,21 @@ import java.time.LocalDateTime;
 
 public record PostCommentResponse(
         Long id,
-        String content,
-        String author,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Long authorId,
+        String authorName,
+        String content
 ) {
 
     public static PostCommentResponse from(PostComment comment) {
         return new PostCommentResponse(
                 comment.getId(),
-                comment.getContent(),
-                comment.getAuthor(),
                 comment.getCreatedAt(),
-                comment.getUpdatedAt()
+                comment.getUpdatedAt(),
+                comment.getAuthor().getId(),
+                comment.getAuthor().getName(),
+                comment.getContent()
         );
     }
 }

@@ -1,6 +1,8 @@
 package com._61119report.post.post.service;
 
 import com._61119report.global.exception.PostNotFoundException;
+import com._61119report.member.member.entity.Member;
+import com._61119report.member.member.service.MemberService;
 import com._61119report.post.post.dto.PostCreateRequest;
 import com._61119report.post.post.dto.PostResponse;
 import com._61119report.post.post.dto.PostUpdateRequest;
@@ -17,14 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final MemberService memberService;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, MemberService memberService) {
         this.postRepository = postRepository;
+        this.memberService = memberService;
     }
 
     @Transactional
-    public PostResponse create(PostCreateRequest request) {
-        Post post = new Post(request.title(), request.content(), request.author());
+    public PostResponse create(Long actorId, PostCreateRequest request) {
+        Member author = memberService.getActor(actorId);
+        Post post = new Post(author, request.title(), request.content());
         return PostResponse.from(postRepository.save(post));
     }
 
@@ -63,9 +68,10 @@ public class PostService {
     }
 
     @Transactional
-    public PostCommentResponse addComment(Long postId, PostCommentCreateRequest request) {
+    public PostCommentResponse addComment(Long postId, Long actorId, PostCommentCreateRequest request) {
+        Member author = memberService.getActor(actorId);
         Post post = getPost(postId);
-        PostComment comment = post.addComment(request.content(), request.author());
+        PostComment comment = post.addComment(author, request.content());
         postRepository.flush(); // 응답에 담을 댓글 id 를 받기 위해 즉시 반영
         return PostCommentResponse.from(comment);
     }

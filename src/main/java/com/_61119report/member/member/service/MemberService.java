@@ -43,12 +43,20 @@ public class MemberService {
      */
     @Transactional(readOnly = true)
     public MemberDto findMe(Long actorId) {
+        return MemberDto.from(getActor(actorId));
+    }
+
+    /**
+     * actorId 에 해당하는 회원 엔티티. 글/댓글 작성자 지정 등에 사용.
+     * actorId 가 없거나 존재하지 않는 회원이면 인증 실패(401).
+     */
+    @Transactional(readOnly = true)
+    public Member getActor(Long actorId) {
         if (actorId == null) {
             throw new UnauthenticatedException();
         }
 
         return memberRepository.findById(actorId)
-                .map(MemberDto::from)
                 .orElseThrow(UnauthenticatedException::new);
     }
 }

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com._61119report.member.member.entity.Member;
 import com._61119report.member.member.repository.MemberRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,17 +26,14 @@ class MemberControllerTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @BeforeEach
-    void setUp() {
-        memberRepository.deleteAll();
-    }
-
     @Test
     void join() throws Exception {
+        memberRepository.findByUsername("newuser").ifPresent(memberRepository::delete);
+
         mockMvc.perform(post("/api/members/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"username":"user1","password":"password1","name":"홍길동"}
+                                {"username":"newuser","password":"password1","name":"홍길동"}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
@@ -47,8 +43,7 @@ class MemberControllerTest {
 
     @Test
     void joinDuplicateUsername() throws Exception {
-        memberRepository.save(new Member("user1", "password1", "홍길동"));
-
+        // user1 은 샘플 데이터(BaseInitData)로 이미 존재
         mockMvc.perform(post("/api/members/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -62,7 +57,7 @@ class MemberControllerTest {
 
     @Test
     void me() throws Exception {
-        Member member = memberRepository.save(new Member("user1", "password1", "홍길동"));
+        Member member = memberRepository.findByUsername("user1").orElseThrow();
 
         mockMvc.perform(get("/api/members/me").param("actorId", member.getId().toString()))
                 .andExpect(status().isOk())
@@ -70,7 +65,7 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.createDate").exists())
                 .andExpect(jsonPath("$.updateDate").exists())
                 .andExpect(jsonPath("$.username").value("user1"))
-                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.name").value("유저1"))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
 
