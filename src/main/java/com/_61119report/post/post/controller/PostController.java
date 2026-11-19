@@ -50,14 +50,18 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public RsData<PostResponse> update(@PathVariable Long id, @Valid @RequestBody PostUpdateRequest request) {
-        PostResponse response = postService.update(id, request);
+    public RsData<PostResponse> update(
+            @PathVariable Long id,
+            @RequestParam(required = false) Long actorId,
+            @Valid @RequestBody PostUpdateRequest request
+    ) {
+        PostResponse response = postService.update(id, actorId, request);
         return new RsData<>("200-1", "%d번 글이 수정되었습니다.".formatted(id), response);
     }
 
     @DeleteMapping("/{id}")
-    public RsData<Void> delete(@PathVariable Long id) {
-        postService.delete(id);
+    public RsData<Void> delete(@PathVariable Long id, @RequestParam(required = false) Long actorId) {
+        postService.delete(id, actorId);
         return new RsData<>("200-1", "%d번 글이 삭제되었습니다.".formatted(id));
     }
 }

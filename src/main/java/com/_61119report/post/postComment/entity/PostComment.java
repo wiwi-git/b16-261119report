@@ -1,6 +1,7 @@
 package com._61119report.post.postComment.entity;
 
 import com._61119report.global.entity.BaseEntity;
+import com._61119report.global.exception.AccessDeniedException;
 import com._61119report.member.member.entity.Member;
 import com._61119report.post.post.entity.Post;
 import jakarta.persistence.Column;
@@ -33,6 +34,12 @@ public class PostComment extends BaseEntity {
         this.post = post;
         this.author = author;
         this.content = content;
+    }
+
+    public void checkActorCanDelete(Member actor) {
+        if (!author.getId().equals(actor.getId())) {
+            throw new AccessDeniedException("작성자만 댓글을 삭제할 수 있습니다.");
+        }
     }
 
     public Post getPost() {

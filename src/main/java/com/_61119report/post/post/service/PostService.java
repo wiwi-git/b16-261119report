@@ -46,16 +46,21 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse update(Long id, PostUpdateRequest request) {
+    public PostResponse update(Long id, Long actorId, PostUpdateRequest request) {
+        Member actor = memberService.getActor(actorId);
         Post post = getPost(id);
+        post.checkActorCanModify(actor);
         post.update(request.title(), request.content());
         postRepository.flush();
         return PostResponse.from(post);
     }
 
     @Transactional
-    public void delete(Long id) {
-        postRepository.delete(getPost(id));
+    public void delete(Long id, Long actorId) {
+        Member actor = memberService.getActor(actorId);
+        Post post = getPost(id);
+        post.checkActorCanDelete(actor);
+        postRepository.delete(post);
     }
 
     // ===== 댓글: Post 애그리거트를 통해 처리 (save/delete 호출 없이 더티체킹) =====
@@ -77,9 +82,10 @@ public class PostService {
     }
 
     @Transactional
-    public void deleteComment(Long postId, Long commentId) {
+    public void deleteComment(Long postId, Long commentId, Long actorId) {
+        Member actor = memberService.getActor(actorId);
         Post post = getPost(postId);
-        post.removeComment(commentId); // orphanRemoval 로 커밋 시 DELETE
+        post.removeComment(actor, commentId); // 작성자 확인 후 컬렉션에서 제거 → orphanRemoval 로 커밋 시 DELETE
     }
 
     private Post getPost(Long id) {

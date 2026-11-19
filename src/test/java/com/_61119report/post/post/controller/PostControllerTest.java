@@ -103,6 +103,7 @@ class PostControllerTest {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
         mockMvc.perform(put("/api/posts/{id}", saved.getId())
+                        .param("actorId", author.getId().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":"수정 제목","content":"수정 내용"}
@@ -115,10 +116,27 @@ class PostControllerTest {
     }
 
     @Test
+    void updateByNonAuthor() throws Exception {
+        Post saved = postRepository.save(new Post(author, "t1", "c1"));
+        Member other = memberRepository.findByUsername("user2").orElseThrow();
+
+        mockMvc.perform(put("/api/posts/{id}", saved.getId())
+                        .param("actorId", other.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"수정 제목","content":"수정 내용"}
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.msg").value("작성자만 글을 수정할 수 있습니다."));
+    }
+
+    @Test
     void deletePost() throws Exception {
         Post saved = postRepository.save(new Post(author, "t1", "c1"));
 
-        mockMvc.perform(delete("/api/posts/{id}", saved.getId()))
+        mockMvc.perform(delete("/api/posts/{id}", saved.getId())
+                        .param("actorId", author.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 글이 삭제되었습니다.".formatted(saved.getId())))

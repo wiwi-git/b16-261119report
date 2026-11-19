@@ -1,6 +1,7 @@
 package com._61119report.post.post.entity;
 
 import com._61119report.global.entity.BaseEntity;
+import com._61119report.global.exception.AccessDeniedException;
 import com._61119report.global.exception.PostCommentNotFoundException;
 import com._61119report.member.member.entity.Member;
 import com._61119report.post.postComment.entity.PostComment;
@@ -56,12 +57,29 @@ public class Post extends BaseEntity {
         return comment;
     }
 
-    public void removeComment(Long commentId) {
+    public void removeComment(Member actor, Long commentId) {
         PostComment comment = comments.stream()
                 .filter(c -> c.getId().equals(commentId))
                 .findFirst()
                 .orElseThrow(() -> new PostCommentNotFoundException(commentId));
+        comment.checkActorCanDelete(actor);
         comments.remove(comment);
+    }
+
+    public void checkActorCanModify(Member actor) {
+        if (!isAuthor(actor)) {
+            throw new AccessDeniedException("작성자만 글을 수정할 수 있습니다.");
+        }
+    }
+
+    public void checkActorCanDelete(Member actor) {
+        if (!isAuthor(actor)) {
+            throw new AccessDeniedException("작성자만 글을 삭제할 수 있습니다.");
+        }
+    }
+
+    private boolean isAuthor(Member actor) {
+        return author.getId().equals(actor.getId());
     }
 
     public List<PostComment> getComments() {

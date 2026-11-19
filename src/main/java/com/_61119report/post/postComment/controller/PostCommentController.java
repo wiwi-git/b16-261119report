@@ -45,8 +45,12 @@ public class PostCommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public RsData<Void> delete(@PathVariable Long postId, @PathVariable Long commentId) {
-        postService.deleteComment(postId, commentId);
+    public RsData<Void> delete(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @RequestParam(required = false) Long actorId
+    ) {
+        postService.deleteComment(postId, commentId, actorId);
         return new RsData<>("200-1", "%d번 댓글이 삭제되었습니다.".formatted(commentId));
     }
 }

@@ -104,7 +104,8 @@ class PostCommentControllerTest {
     void deleteComment() throws Exception {
         PostCommentResponse comment = addComment("c1");
 
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id()))
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+                        .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 댓글이 삭제되었습니다.".formatted(comment.id())))
@@ -114,8 +115,23 @@ class PostCommentControllerTest {
     }
 
     @Test
+    void deleteCommentByNonAuthor() throws Exception {
+        PostCommentResponse comment = addComment("c1");
+
+        // 글 작성자(user1)라도 댓글 작성자(user2)가 아니면 삭제 불가
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id())
+                        .param("actorId", postAuthor.getId().toString()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.msg").value("작성자만 댓글을 삭제할 수 있습니다."));
+
+        assertThat(commentCount()).isEqualTo(1);
+    }
+
+    @Test
     void deleteMissingComment() throws Exception {
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), 9999))
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), 9999)
+                        .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isNotFound());
     }
 
@@ -124,7 +140,8 @@ class PostCommentControllerTest {
         PostCommentResponse comment = addComment("c1");
         Post other = postRepository.save(new Post(postAuthor, "다른 글", "내용"));
 
-        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", other.getId(), comment.id()))
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", other.getId(), comment.id())
+                        .param("actorId", commentAuthor.getId().toString()))
                 .andExpect(status().isNotFound());
 
         assertThat(commentCount()).isEqualTo(1);
@@ -135,7 +152,8 @@ class PostCommentControllerTest {
         addComment("c1");
         addComment("c2");
 
-        mockMvc.perform(delete("/api/posts/{id}", post.getId()))
+        mockMvc.perform(delete("/api/posts/{id}", post.getId())
+                        .param("actorId", postAuthor.getId().toString()))
                 .andExpect(status().isOk());
 
         assertThat(commentCount()).isZero();
