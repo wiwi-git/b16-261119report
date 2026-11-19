@@ -38,7 +38,7 @@ public class PostComment extends BaseEntity {
 
     public void checkActorCanDelete(Member actor) {
         if (!author.getId().equals(actor.getId())) {
-            throw new AccessDeniedException("작성자만 댓글을 삭제할 수 있습니다.");
+            throw new AccessDeniedException();
         }
     }
 

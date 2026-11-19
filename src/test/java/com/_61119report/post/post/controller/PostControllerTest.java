@@ -128,7 +128,7 @@ class PostControllerTest {
                                 """))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
-                .andExpect(jsonPath("$.msg").value("작성자만 글을 수정할 수 있습니다."));
+                .andExpect(jsonPath("$.msg").value("권한이 없습니다."));
     }
 
     @Test
