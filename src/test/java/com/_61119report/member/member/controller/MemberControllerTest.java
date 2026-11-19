@@ -1,5 +1,6 @@
 package com._61119report.member.member.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,6 +58,27 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("409-1"))
                 .andExpect(jsonPath("$.msg").value("user1(은)는 이미 사용중인 username 입니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void me() throws Exception {
+        Member member = memberRepository.save(new Member("user1", "password1", "홍길동"));
+
+        mockMvc.perform(get("/api/members/me").param("actorId", member.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(member.getId()))
+                .andExpect(jsonPath("$.createDate").exists())
+                .andExpect(jsonPath("$.updateDate").exists())
+                .andExpect(jsonPath("$.username").value("user1"))
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void meWithoutActorId() throws Exception {
+        mockMvc.perform(get("/api/members/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-1"));
     }
 
     @Test
