@@ -4,6 +4,7 @@ import com._61119report.global.rsData.RsData;
 import com._61119report.post.post.service.PostService;
 import com._61119report.post.postComment.dto.PostCommentCreateRequest;
 import com._61119report.post.postComment.dto.PostCommentResponse;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +36,7 @@ public class PostCommentController {
     @PostMapping
     public RsData<PostCommentResponse> create(
             @PathVariable Long postId,
-            @RequestBody PostCommentCreateRequest request
+            @Valid @RequestBody PostCommentCreateRequest request
     ) {
         PostCommentResponse response = postService.addComment(postId, request);
         return new RsData<>("201-1", "%d번 댓글이 작성되었습니다.".formatted(response.id()), response);

@@ -10,7 +10,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * RsData 를 반환하는 GET/POST/PUT/DELETE API 의 HTTP 상태코드를 rsData.statusCode() 로 지정한다.
+ * RsData 를 반환하는 GET/POST/PUT/DELETE API 와 @ExceptionHandler(GlobalExceptionHandler)의
+ * HTTP 상태코드를 rsData.statusCode() 로 지정한다.
  * 컨트롤러는 ResponseEntity 없이 RsData 를 그대로 반환하면 된다.
  */
 @Aspect
@@ -23,6 +24,7 @@ public class ResponseAspect {
                 || @annotation(org.springframework.web.bind.annotation.PostMapping)
                 || @annotation(org.springframework.web.bind.annotation.PutMapping)
                 || @annotation(org.springframework.web.bind.annotation.DeleteMapping)
+                || @annotation(org.springframework.web.bind.annotation.ExceptionHandler)
             )
             && execution(com._61119report.global.rsData.RsData *(..))
             """)

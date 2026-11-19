@@ -1,12 +1,11 @@
 package com._61119report.global.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
+/**
+ * 존재하지 않는 글 조회/수정/삭제 → GlobalExceptionHandler 에서 404 처리.
+ */
 public class PostNotFoundException extends RuntimeException {
 
     public PostNotFoundException(Long id) {
-        super("Post not found: id=" + id);
+        super("%d번 글은 존재하지 않습니다.".formatted(id));
     }
 }
