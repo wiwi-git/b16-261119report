@@ -87,7 +87,7 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/test/exceptions/duplicate-username"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.resultCode").value("409-1"))
-                .andExpect(jsonPath("$.msg").value("user1 는 이미 사용 중인 아이디입니다."));
+                .andExpect(jsonPath("$.msg").value("user1(은)는 이미 사용중인 username 입니다."));
     }
 
     @Test

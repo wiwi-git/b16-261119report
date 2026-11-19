@@ -6,6 +6,6 @@ package com._61119report.global.exception;
 public class MemberDuplicateUsernameException extends RuntimeException {
 
     public MemberDuplicateUsernameException(String username) {
-        super("%s 는 이미 사용 중인 아이디입니다.".formatted(username));
+        super("%s(은)는 이미 사용중인 username 입니다.".formatted(username));
     }
 }
