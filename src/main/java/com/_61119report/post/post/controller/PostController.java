@@ -5,6 +5,8 @@ import com._61119report.post.post.dto.PostCreateRequest;
 import com._61119report.post.post.dto.PostResponse;
 import com._61119report.post.post.dto.PostUpdateRequest;
 import com._61119report.post.post.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * RsData 반환 API 의 HTTP 상태코드는 ResponseAspect 가 rsData.statusCode() 로 지정한다.
  */
 @RestController
+@Tag(name = "PostController", description = "글 API")
 @RequestMapping("/api/posts")
 public class PostController {
 
@@ -31,6 +34,7 @@ public class PostController {
     }
 
     @PostMapping
+    @Operation(summary = "글 작성")
     public RsData<PostResponse> create(
             @RequestParam(required = false) Long actorId,
             @Valid @RequestBody PostCreateRequest request
@@ -40,16 +44,19 @@ public class PostController {
     }
 
     @GetMapping
+    @Operation(summary = "다건 조회")
     public List<PostResponse> findAll() {
         return postService.findAll();
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "단건 조회")
     public PostResponse findById(@PathVariable Long id) {
         return postService.findById(id);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "수정")
     public RsData<PostResponse> update(
             @PathVariable Long id,
             @RequestParam(required = false) Long actorId,
@@ -60,6 +67,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "삭제")
     public RsData<Void> delete(@PathVariable Long id, @RequestParam(required = false) Long actorId) {
         postService.delete(id, actorId);
         return new RsData<>("200-1", "%d번 글이 삭제되었습니다.".formatted(id));

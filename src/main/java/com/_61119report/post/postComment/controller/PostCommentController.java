@@ -4,6 +4,8 @@ import com._61119report.global.rsData.RsData;
 import com._61119report.post.post.service.PostService;
 import com._61119report.post.postComment.dto.PostCommentCreateRequest;
 import com._61119report.post.postComment.dto.PostCommentResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  * RsData 반환 API 의 HTTP 상태코드는 ResponseAspect 가 rsData.statusCode() 로 지정한다.
  */
 @RestController
+@Tag(name = "PostCommentController", description = "댓글 API")
 @RequestMapping("/api/posts/{postId}/comments")
 public class PostCommentController {
 
@@ -30,11 +33,13 @@ public class PostCommentController {
     }
 
     @GetMapping
+    @Operation(summary = "다건 조회")
     public List<PostCommentResponse> findAll(@PathVariable Long postId) {
         return postService.findComments(postId);
     }
 
     @PostMapping
+    @Operation(summary = "댓글 작성")
     public RsData<PostCommentResponse> create(
             @PathVariable Long postId,
             @RequestParam(required = false) Long actorId,
@@ -45,6 +50,7 @@ public class PostCommentController {
     }
 
     @DeleteMapping("/{commentId}")
+    @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable Long postId,
             @PathVariable Long commentId,
