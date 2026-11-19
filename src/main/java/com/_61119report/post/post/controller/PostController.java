@@ -1,5 +1,6 @@
 package com._61119report.post.post.controller;
 
+import com._61119report.global.rsData.RsData;
 import com._61119report.post.post.dto.PostCreateRequest;
 import com._61119report.post.post.dto.PostResponse;
 import com._61119report.post.post.dto.PostUpdateRequest;
@@ -27,9 +28,14 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestBody PostCreateRequest request) {
+    public ResponseEntity<RsData<PostResponse>> create(@RequestBody PostCreateRequest request) {
         PostResponse response = postService.create(request);
-        return ResponseEntity.created(URI.create("/api/posts/" + response.id())).body(response);
+        RsData<PostResponse> rsData = new RsData<>(
+                "201-1", "%d번 글이 작성되었습니다.".formatted(response.id()), response);
+
+        return ResponseEntity.status(rsData.statusCode())
+                .location(URI.create("/api/posts/" + response.id()))
+                .body(rsData);
     }
 
     @GetMapping
@@ -43,13 +49,22 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public PostResponse update(@PathVariable Long id, @RequestBody PostUpdateRequest request) {
-        return postService.update(id, request);
+    public ResponseEntity<RsData<PostResponse>> update(
+            @PathVariable Long id,
+            @RequestBody PostUpdateRequest request
+    ) {
+        PostResponse response = postService.update(id, request);
+        RsData<PostResponse> rsData = new RsData<>(
+                "200-1", "%d번 글이 수정되었습니다.".formatted(id), response);
+
+        return ResponseEntity.status(rsData.statusCode()).body(rsData);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<RsData<Void>> delete(@PathVariable Long id) {
         postService.delete(id);
-        return ResponseEntity.noContent().build();
+        RsData<Void> rsData = new RsData<>("200-1", "%d번 글이 삭제되었습니다.".formatted(id));
+
+        return ResponseEntity.status(rsData.statusCode()).body(rsData);
     }
 }

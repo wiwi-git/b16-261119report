@@ -1,6 +1,7 @@
 package com._61119report.post.postComment.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -57,9 +58,12 @@ class PostCommentControllerTest {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.content").value("댓글"))
-                .andExpect(jsonPath("$.author").value("kim"));
+                .andExpect(jsonPath("$.resultCode").value("201-1"))
+                .andExpect(jsonPath("$.statusCode").doesNotExist())
+                .andExpect(jsonPath("$.msg").value(endsWith("번 댓글이 작성되었습니다.")))
+                .andExpect(jsonPath("$.data.id").isNumber())
+                .andExpect(jsonPath("$.data.content").value("댓글"))
+                .andExpect(jsonPath("$.data.author").value("kim"));
 
         assertThat(commentCount()).isEqualTo(1);
     }
@@ -91,7 +95,10 @@ class PostCommentControllerTest {
         PostCommentResponse comment = addComment("c1");
 
         mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", post.getId(), comment.id()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 댓글이 삭제되었습니다.".formatted(comment.id())))
+                .andExpect(jsonPath("$.data").doesNotExist());
 
         assertThat(commentCount()).isZero();
     }
@@ -119,7 +126,7 @@ class PostCommentControllerTest {
         addComment("c2");
 
         mockMvc.perform(delete("/api/posts/{id}", post.getId()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         assertThat(commentCount()).isZero();
     }

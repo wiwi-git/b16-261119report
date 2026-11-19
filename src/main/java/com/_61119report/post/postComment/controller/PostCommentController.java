@@ -1,5 +1,6 @@
 package com._61119report.post.postComment.controller;
 
+import com._61119report.global.rsData.RsData;
 import com._61119report.post.post.service.PostService;
 import com._61119report.post.postComment.dto.PostCommentCreateRequest;
 import com._61119report.post.postComment.dto.PostCommentResponse;
@@ -33,19 +34,24 @@ public class PostCommentController {
     }
 
     @PostMapping
-    public ResponseEntity<PostCommentResponse> create(
+    public ResponseEntity<RsData<PostCommentResponse>> create(
             @PathVariable Long postId,
             @RequestBody PostCommentCreateRequest request
     ) {
         PostCommentResponse response = postService.addComment(postId, request);
-        return ResponseEntity
-                .created(URI.create("/api/posts/" + postId + "/comments/" + response.id()))
-                .body(response);
+        RsData<PostCommentResponse> rsData = new RsData<>(
+                "201-1", "%d번 댓글이 작성되었습니다.".formatted(response.id()), response);
+
+        return ResponseEntity.status(rsData.statusCode())
+                .location(URI.create("/api/posts/" + postId + "/comments/" + response.id()))
+                .body(rsData);
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> delete(@PathVariable Long postId, @PathVariable Long commentId) {
+    public ResponseEntity<RsData<Void>> delete(@PathVariable Long postId, @PathVariable Long commentId) {
         postService.deleteComment(postId, commentId);
-        return ResponseEntity.noContent().build();
+        RsData<Void> rsData = new RsData<>("200-1", "%d번 댓글이 삭제되었습니다.".formatted(commentId));
+
+        return ResponseEntity.status(rsData.statusCode()).body(rsData);
     }
 }
